@@ -2,6 +2,26 @@ import tkinter as tk
 import sys
 import threading as th
 from ctypes import windll
+import time
+from datetime import time
+
+
+### Classes for Custom Controls ####  
+'''
+make the custom list for the current tasks - task naem with the closer and other button cose adn completed button
+another frame with the scrollable frame and data which is to be saved 
+
+
+
+'''
+
+
+
+
+
+
+
+
 
 
 ### Constants ###
@@ -21,6 +41,10 @@ app_height  = 600
 minimized  = True
 main_x = 0 
 main_y = 0
+timer_seconds  = 0
+timer_minutes = 0 
+timer_hours = 0
+actual_timer  = 0
 
 
 
@@ -98,6 +122,18 @@ application_name  = tk.Label(title_bar , text  = "Chrono Track" )
 
 
 
+##### Application Main Controls  #######  
+'''
+Only Tkinter is being used for this - Timer would be used instead of clock animation
+
+'''
+timer_frame  = tk.Frame(window , height=app_height / 3 , width=app_width , background = red_color)
+task_frame = tk.Frame(window , height=app_height - app_height / 3 , width=app_width , background=white_color)
+actual_timer  = tk.Label(timer_frame , text="00:00:00")
+add_button = tk.Button(task_frame ,  text="+"  , height=2 , width=4)
+
+
+
 
 ##### Configuring the controls #### 
 def button_styles(master , height , width , background , foreground , activebg , activefg , bd = 0 ):
@@ -109,8 +145,11 @@ title_bar.pack_propagate(False)
 close_button.configure(background=controls_base , foreground=icons_front_color , relief='flat' , bd=0 , activebackground=red_color , activeforeground=white_color )
 minimized_button.configure(background=controls_base , foreground=icons_front_color , relief='flat' , bd = 0 , activebackground=other_icons_back_color , activeforeground=white_color)
 application_name.configure(background=controls_base , foreground=white_color)
+add_button.configure(background=controls_base , foreground=white_color , activebackground=red_color , activeforeground=white_color , relief='flat' , bd = 0)
 
 
+timer_frame.pack_propagate(0)
+task_frame.pack_propagate(0)
 
 
 ##### Binding the controls ##### 
@@ -127,6 +166,11 @@ title_bar.pack()
 close_button.pack(side=tk.RIGHT ,padx=(0,0) , fill=tk.Y)
 minimized_button.pack(side=tk.RIGHT , padx=(0 , 0) , fill=tk.Y)
 application_name.pack(side = tk.LEFT , padx=(5 , 0))
+
+timer_frame.pack()
+task_frame.pack()
+actual_timer.pack(pady=10)
+add_button.pack(side = tk.RIGHT , pady=(2) , padx=(2) , anchor=tk.NE)
 
 
 
