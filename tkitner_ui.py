@@ -3,10 +3,24 @@ from tkinter import ttk
 import sys
 import threading as th
 from ctypes import windll
-import time
+from time import sleep
 from datetime import time
 import textwrap
 
+
+### Constants ###
+application_base = '#1E1E1E'
+controls_base = '#2F2F2F'
+controls_non_use_base = '#101010'
+controls_base_2 = '#1F1F1F'
+icons_front_color = '#A7A7A7'
+icons_front_color_2 = '#458DFF'
+other_icons_back_color = '#222B39'
+red_color  = "#ff0000"
+white_color  = '#ffffff'
+current_text_id  = 0
+text_details = {} # Name and id number and the time spent in the data
+timer_working  = True
 
 
 ### Classes for Custom Controls ####  
@@ -18,29 +32,90 @@ make the textbox multiline - in any case the textbox text sentences are increase
 
 '''
 
-class current_text():
 
+
+class current_text():
 
     def wrap_text(self , text  , width):
         self.current_text =  "\n".join(textwrap.wrap(text, width=width))
 
-    def check_id(self):
-        print(self.text_i)
+    def timer_started(self):
+        global window
+        global timer_working
+        global actual_timer
+
+        self.current_seconds+=1
+
+        if self.current_seconds == 60:
+            self.current_seconds = 0
+            self.current_minutes+=1
+        
+        if self.current_minutes == 60:
+            self.current_hour+=1
+            self.current_minutes = 0
+        
+        actual_timer.configure(text=f"{self.current_hour:02}:{self.current_minutes:02}:{self.current_seconds:02}")
+
+        if timer_working == False:
+            window.after(1000 , self.timer_started)
+        else:
+            actual_timer.configure(text="00:00:00")
+
+            
+
+
+
+    def timer_stopped (self):
+        global text_details
+        global actual_timer
+        
+        text_details.update({"task_id" : self.text_i , "task_name" : self.text_name , "task_time" : str(str(self.current_hour) + ":" + str(self.current_minutes) + ":" + str(self.current_seconds) )})
+        for key in text_details.values():
+
+            print(key)
+
+        actual_timer.configure(text="00:00:00")
+
+
+    def start_stop(self):
+        global timer_working
+        if self.working == True:
+            if timer_working == True:
+                self.start_stop_button.configure(text="\u23F9")
+                self.working = False
+                self.text_label.configure(background=other_icons_back_color)
+                timer_working = False
+                self.timer_started()
+        elif self.working == False:
+            if timer_working == False:
+                self.start_stop_button.configure(text="\u25B6")
+                self.text_label.configure(background=application_base)
+                self.working = True
+                timer_working = True
+                self.timer_stopped()
+
+
     
     def delete_item_data(self):
         self.main_frame.destroy()
 
 
-
-    def __init__(self , master_control , text_name , text_id , char_length = 64 , current_time = "00:00:00"):
+    def __init__(self , master_control , text_name , text_id , char_length = 64 , current_time = "00:00:00" ):
         self.master_control = master_control
         self.text_name = text_name
         self.text_i  = text_id
         self.char_length  = char_length
 
+        global timer_working
+
         self.current_hour  = int(current_time.split(":")[0])
         self.current_minutes = int(current_time.split(":")[1])
         self.current_seconds = int(current_time.split(":")[2])
+
+
+       
+
+        self.working  = True
 
         
         self.current_text  = ""
@@ -57,12 +132,11 @@ class current_text():
             self.wrap_text(self.text_name , 90)
            
 
-        
         self.main_frame  = tk.Frame(self.master_control , width=9 , height= self.current_height , background=application_base , bd=1 )
         self.main_frame.pack_propagate(0)
 
         self.text_label  = tk.Label(self.main_frame , text=self.current_text , height=self.current_height , width=49 , justify="left", anchor="w" , background=application_base , font=button_font , foreground=white_color)
-        self.start_stop_button  = tk.Button(self.main_frame , text="\u25B6" , background=controls_base , foreground=icons_front_color_2 , activebackground=red_color , activeforeground=white_color , relief="sunken", bd = 2 , command=self.check_id)
+        self.start_stop_button  = tk.Button(self.main_frame , text="\u25B6" , background=controls_base , foreground=icons_front_color_2 , activebackground=red_color , activeforeground=white_color , relief="sunken", bd = 2 , command=self.start_stop)
         ## Stp Button \u23F9
 
         self.delete_button  = tk.Button(self.main_frame , text="\U0001F5D1" , background=controls_base , foreground=icons_front_color_2 , activebackground=red_color , activeforeground=white_color , relief="sunken", bd = 2 , command=self.delete_item_data)
@@ -72,22 +146,8 @@ class current_text():
         self.start_stop_button.grid(row= 0 , column= 5 ,  columnspan=1 , sticky=tk.NSEW )
         self.delete_button.grid(row = 1  , column=5 , columnspan=1   , sticky=tk.NSEW )
 
-    
 
 
-
-### Constants ###
-application_base = '#1E1E1E'
-controls_base = '#2F2F2F'
-controls_non_use_base = '#101010'
-controls_base_2 = '#1F1F1F'
-icons_front_color = '#A7A7A7'
-icons_front_color_2 = '#458DFF'
-other_icons_back_color = '#222B39'
-red_color  = "#ff0000"
-white_color  = '#ffffff'
-current_text_id  = 0
-text_class_data = []
 
 
 
@@ -178,7 +238,7 @@ def add_text_task():
     if len(char_length) > 0 : 
         global current_text_id
         current_text_id  += 1
-        text_class_data.append(current_text_id)
+        
         text_control  = current_text(scrollable_frame , char_length , current_text_id , len(char_length))
         task_name_textbox.delete( 0 , tk.END)
 
@@ -189,7 +249,7 @@ def add_text_task_temp(event):
     if len(char_length) > 0 : 
         global current_text_id
         current_text_id  += 1
-        text_class_data.append(current_text_id)
+        # text_class_data.append(current_text_id)
         text_control  = current_text(scrollable_frame , char_length , current_text_id , len(char_length))
         task_name_textbox.delete( 0 , tk.END)
    
