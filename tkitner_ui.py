@@ -24,18 +24,26 @@ class current_text():
     def wrap_text(self , text  , width):
         self.current_text =  "\n".join(textwrap.wrap(text, width=width))
 
+    def check_id(self):
+        print(self.text_i)
+    
+    def delete_item_data(self):
+        self.main_frame.destroy()
 
 
-    def __init__(self , master_control , text_name , text_id , char_length = 64):
+
+    def __init__(self , master_control , text_name , text_id , char_length = 64 , current_time = "00:00:00"):
         self.master_control = master_control
         self.text_name = text_name
         self.text_i  = text_id
         self.char_length  = char_length
+
+        self.current_hour  = int(current_time.split(":")[0])
+        self.current_minutes = int(current_time.split(":")[1])
+        self.current_seconds = int(current_time.split(":")[2])
+
         
-
-
         self.current_text  = ""
-
 
         if char_length <= 64:
             self.current_height  = 3
@@ -50,23 +58,19 @@ class current_text():
            
 
         
-        self.main_frame  = tk.Frame(self.master_control , width=10 , height= self.current_height , background="white")
+        self.main_frame  = tk.Frame(self.master_control , width=9 , height= self.current_height , background=application_base , bd=1 )
         self.main_frame.pack_propagate(0)
 
-        self.text_label  = tk.Label(self.main_frame , text=self.current_text , height=self.current_height , width=49 , justify="left", anchor="w")
-        self.start_stop_button  = tk.Button(self.main_frame , text="St")
-        self.pause_button  = tk.Button(self.main_frame , text="Pa")
+        self.text_label  = tk.Label(self.main_frame , text=self.current_text , height=self.current_height , width=49 , justify="left", anchor="w" , background=application_base , font=button_font , foreground=white_color)
+        self.start_stop_button  = tk.Button(self.main_frame , text="\u25B6" , background=controls_base , foreground=icons_front_color_2 , activebackground=red_color , activeforeground=white_color , relief="sunken", bd = 2 , command=self.check_id)
+        ## Stp Button \u23F9
 
-
+        self.delete_button  = tk.Button(self.main_frame , text="\U0001F5D1" , background=controls_base , foreground=icons_front_color_2 , activebackground=red_color , activeforeground=white_color , relief="sunken", bd = 2 , command=self.delete_item_data)
         self.main_frame.pack(padx=5 , pady = 5 )
 
         self.text_label.grid(row  = 0 , column=  0 , columnspan=4 , rowspan=2 ,sticky=tk.W)
-        self.start_stop_button.grid(row= 0 , column= 5 ,  columnspan=1 , sticky=tk.N)
-        self.pause_button.grid(row = 1  , column=5 , columnspan=1   ,sticky=tk.N )
-
-
-        
-
+        self.start_stop_button.grid(row= 0 , column= 5 ,  columnspan=1 , sticky=tk.NSEW )
+        self.delete_button.grid(row = 1  , column=5 , columnspan=1   , sticky=tk.NSEW )
 
     
 
@@ -96,9 +100,11 @@ timer_seconds  = 0
 timer_minutes = 0 
 timer_hours = 0
 actual_timer  = 0
-text_font=("Futura", 50 , 'bold')
-entry_font = ("helvetica" , 14)
+text_font=("Futura", 55 , 'bold')
+entry_font = ("Helvetica" , 10)
 class_task_font = ("Helvetica" , 15)
+button_font  = ("Helvetica" , 8 , "bold")
+
 
 
 window  = tk.Tk()
@@ -206,18 +212,18 @@ application_name  = tk.Label(title_bar , text  = "Chrono Track" )
 Only Tkinter is being used for this - Timer would be used instead of clock animation
 
 '''
-timer_frame  = tk.Frame(window , height=app_height / 3 , width=app_width , background = red_color)
-task_frame = tk.Frame(window , height=app_height - app_height / 3 , width=app_width , background=white_color)
-actual_timer  = tk.Label(timer_frame , text="00:00:00" , font=text_font )
-add_button = tk.Button(task_frame ,  text="+"  , height=2 , width=4 , command=add_text_task)
-canvas_frame = tk.Frame(task_frame , background=red_color , height=329 , width=400)
-canvas = tk.Canvas(canvas_frame , background=red_color , height=329 , width = 400)
-scrollbar = ttk.Scrollbar(canvas_frame, orient="vertical", command=canvas.yview)
-scrollable_frame = ttk.Frame(canvas)
-canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+timer_frame  = tk.Frame(window , height=app_height / 3 , width=app_width , background=application_base )
+task_frame = tk.Frame(window , height=app_height - app_height / 3 , width=app_width , background=controls_base ) 
+actual_timer  = tk.Label(timer_frame , text="00:00:00" , font=text_font , background=application_base , foreground=icons_front_color , relief="sunken" , bd = 1  )
+add_button = tk.Button(task_frame ,  text="\u2795"  , height=2 , width=4 , command=add_text_task , font=button_font, foreground=red_color)
+canvas_frame = tk.Frame(task_frame  , height=329 , width=400 ,background=application_base)
+canvas = tk.Canvas(canvas_frame , background=white_color,  height=329 , width = 400)
+scrollbar = ttk.Scrollbar(canvas_frame, orient="vertical", command=canvas.yview )
+scrollable_frame = tk.Frame(canvas )
+canvas.create_window((0, 0), window=scrollable_frame, anchor="nw") 
 
-task_name_textbox = tk.Entry(task_frame , bd = 1 , relief="sunken" , width=59 , background= icons_front_color_2 , font=entry_font)
-
+task_name_textbox = tk.Entry(task_frame , bd = 2 , relief="sunken" , width=55 , background= controls_base , font=entry_font , foreground=white_color , insertbackground=white_color)
+ 
 
 ##### Configuring the controls #### 
 def button_styles(master , height , width , background , foreground , activebg , activefg , bd = 0 ):
@@ -229,7 +235,7 @@ title_bar.pack_propagate(False)
 close_button.configure(background=controls_base , foreground=icons_front_color , relief='flat' , bd=0 , activebackground=red_color , activeforeground=white_color )
 minimized_button.configure(background=controls_base , foreground=icons_front_color , relief='flat' , bd = 0 , activebackground=other_icons_back_color , activeforeground=white_color)
 application_name.configure(background=controls_base , foreground=white_color)
-add_button.configure(background=controls_base , foreground=white_color , activebackground=red_color , activeforeground=white_color , relief='flat' , bd = 0)
+add_button.configure(background=controls_base , foreground=icons_front_color_2 , activebackground=red_color , activeforeground=white_color , relief="sunken", bd = 2)
 canvas_frame.pack_propagate(0)
 timer_frame.pack_propagate(0)
 task_frame.pack_propagate(0)
@@ -267,7 +273,7 @@ canvas.pack()
 canvas.configure(yscrollcommand=scrollbar.set)
 
 
-task_name_textbox.pack(side=tk.LEFT  , padx=(2 , 0) , pady=(9 , 0) , anchor=tk.NE)
+task_name_textbox.pack(side=tk.LEFT  , padx=(3 , 0) , pady=(9 , 0) , anchor=tk.NE)
 
 
 
