@@ -23,16 +23,40 @@ text_details = {} # Name and id number and the time spent in the data
 timer_working  = True
 
 
+#### Code for the local database : 
+## Specific imports for the database : 
+import sqlite3
+import datetime
+
+conn  = sqlite3.connect('chrono_track.db')
+c  = conn.cursor()
+
+
+def saving_details():
+    conn.commit()
+
+def inserting_data():
+    
+    c.execute('INSERT INTO tasks_data (id,name,time) VALUES ("%d" , "%s" , "%s" );' %( text_details['task_id'] , text_details['task_name'] , text_details['task_time']))
+    saving_details()
+    print("Details Saved")
+
+
+def clean_table():
+    c.execute("DELETE FROM tasks_data")
+
+
+def loading_data():
+    c.execute("SELECT * FROM tasks_data;")
+    list  = c.fetchall()
+    for data in list:
+        print(data)
+    saving_details()
+
+
+
+
 ### Classes for Custom Controls ####  
-'''
-make the custom list for the current tasks - task naem with the closer and other button cose adn completed button
-another frame with the scrollable frame and data which is to be saved 
-make the textbox multiline - in any case the textbox text sentences are increased.  
- 
-
-'''
-
-
 
 class current_text():
 
@@ -61,18 +85,20 @@ class current_text():
         else:
             actual_timer.configure(text="00:00:00")
 
-            
-
-
+        
 
     def timer_stopped (self):
         global text_details
         global actual_timer
         
-        text_details.update({"task_id" : self.text_i , "task_name" : self.text_name , "task_time" : str(str(self.current_hour) + ":" + str(self.current_minutes) + ":" + str(self.current_seconds) )})
-        for key in text_details.values():
+        print(self.text_i)
 
-            print(key)
+        if self.text_i in text_details:
+            text_details[self.text_i]["task_time"] = str(str(self.current_hour) + ":" + str(self.current_minutes) + ":" + str(self.current_seconds))
+
+        # text_details.update({"task_id" : self.text_i , "task_name" : self.text_name , "task_time" : str(str(self.current_hour) + ":" + str(self.current_minutes) + ":" + str(self.current_seconds) )})
+       
+            
 
         actual_timer.configure(text="00:00:00")
 
@@ -86,13 +112,14 @@ class current_text():
                 self.text_label.configure(background=other_icons_back_color)
                 timer_working = False
                 self.timer_started()
-        elif self.working == False:
+        elif self.working == False: 
             if timer_working == False:
                 self.start_stop_button.configure(text="\u25B6")
                 self.text_label.configure(background=application_base)
                 self.working = True
                 timer_working = True
                 self.timer_stopped()
+
 
 
     
@@ -111,9 +138,6 @@ class current_text():
         self.current_hour  = int(current_time.split(":")[0])
         self.current_minutes = int(current_time.split(":")[1])
         self.current_seconds = int(current_time.split(":")[2])
-
-
-       
 
         self.working  = True
 
@@ -148,9 +172,6 @@ class current_text():
 
 
 
-
-
-
 app_width  = 400
 app_height  = 600
 minimized  = True
@@ -180,8 +201,6 @@ current_x_location  = ( screen_width // 2 )  - (app_width // 2)
 current_y_locaiton  = (screen_height // 2) - (app_height // 2)
 
 window.geometry(f"{app_width}x{app_height}+{current_x_location}+{current_y_locaiton}")
-
-
 
 
 ###### Functions ######### 
@@ -238,7 +257,7 @@ def add_text_task():
     if len(char_length) > 0 : 
         global current_text_id
         current_text_id  += 1
-        
+        text_details.update({"task_id" : current_text_id , "task_name" : char_length , "task_time"  : "00:00:00" })
         text_control  = current_text(scrollable_frame , char_length , current_text_id , len(char_length))
         task_name_textbox.delete( 0 , tk.END)
 
@@ -249,11 +268,11 @@ def add_text_task_temp(event):
     if len(char_length) > 0 : 
         global current_text_id
         current_text_id  += 1
-        # text_class_data.append(current_text_id)
+        text_details.update({"task_id" : current_text_id , "task_name" : char_length , "task_time"  : "00:00:00"})
         text_control  = current_text(scrollable_frame , char_length , current_text_id , len(char_length))
         task_name_textbox.delete( 0 , tk.END)
+        
    
-
 
 
 
@@ -334,7 +353,6 @@ canvas.configure(yscrollcommand=scrollbar.set)
 
 
 task_name_textbox.pack(side=tk.LEFT  , padx=(3 , 0) , pady=(9 , 0) , anchor=tk.NE)
-
 
 
 window.mainloop()
