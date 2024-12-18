@@ -5,6 +5,8 @@ import threading as th
 from ctypes import windll
 import time
 from datetime import time
+import textwrap
+
 
 
 ### Classes for Custom Controls ####  
@@ -12,23 +14,61 @@ from datetime import time
 make the custom list for the current tasks - task naem with the closer and other button cose adn completed button
 another frame with the scrollable frame and data which is to be saved 
 make the textbox multiline - in any case the textbox text sentences are increased.  
-
+ 
 
 '''
 
 class current_text():
 
-    def __init__(self , master_control , text_name , text_id ):
-        self.text_name  = tk.Text(master_control , height= 3  , width= 100 , background=white_color)
+
+    def wrap_text(self , text  , width):
+        self.current_text =  "\n".join(textwrap.wrap(text, width=width))
+
+
+
+    def __init__(self , master_control , text_name , text_id , char_length = 64):
+        self.master_control = master_control
+        self.text_name = text_name
+        self.text_i  = text_id
+        self.char_length  = char_length
         
-        self.text_name.pack()
+
+
+        self.current_text  = ""
+
+
+        if char_length <= 64:
+            self.current_height  = 3
+            self.current_text = self.text_name
+        elif    60 <= char_length <= 100:
+            self.current_height = 6
+            self.wrap_text(self.text_name , 60)
+            
+        elif char_length >= 105:
+            self.current_height = 7
+            self.wrap_text(self.text_name , 90)
+           
+
+        
+        self.main_frame  = tk.Frame(self.master_control , width=10 , height= self.current_height , background="white")
+        self.main_frame.pack_propagate(0)
+
+        self.text_label  = tk.Label(self.main_frame , text=self.current_text , height=self.current_height , width=49 , justify="left", anchor="w")
+        self.start_stop_button  = tk.Button(self.main_frame , text="St")
+        self.pause_button  = tk.Button(self.main_frame , text="Pa")
+
+
+        self.main_frame.pack(padx=5 , pady = 5 )
+
+        self.text_label.grid(row  = 0 , column=  0 , columnspan=4 , rowspan=2 ,sticky=tk.W)
+        self.start_stop_button.grid(row= 0 , column= 5 ,  columnspan=1 , sticky=tk.N)
+        self.pause_button.grid(row = 1  , column=5 , columnspan=1   ,sticky=tk.N )
+
+
         
 
 
-
-
-
-
+    
 
 
 
@@ -56,8 +96,9 @@ timer_seconds  = 0
 timer_minutes = 0 
 timer_hours = 0
 actual_timer  = 0
-
-
+text_font=("Futura", 50 , 'bold')
+entry_font = ("helvetica" , 14)
+class_task_font = ("Helvetica" , 15)
 
 
 window  = tk.Tk()
@@ -126,10 +167,26 @@ def mouse_move(event):
 
 
 def add_text_task():
-    global current_text_id
-    current_text_id  += 1
-    text_class_data.append(current_text_id)
-    text_control  = current_text(scrollable_frame , "I am the text" , current_text_id)
+
+    char_length  = task_name_textbox.get()
+    if len(char_length) > 0 : 
+        global current_text_id
+        current_text_id  += 1
+        text_class_data.append(current_text_id)
+        text_control  = current_text(scrollable_frame , char_length , current_text_id , len(char_length))
+        task_name_textbox.delete( 0 , tk.END)
+
+    
+def add_text_task_temp(event):
+     
+    char_length  = task_name_textbox.get()
+    if len(char_length) > 0 : 
+        global current_text_id
+        current_text_id  += 1
+        text_class_data.append(current_text_id)
+        text_control  = current_text(scrollable_frame , char_length , current_text_id , len(char_length))
+        task_name_textbox.delete( 0 , tk.END)
+   
 
 
 
@@ -151,13 +208,15 @@ Only Tkinter is being used for this - Timer would be used instead of clock anima
 '''
 timer_frame  = tk.Frame(window , height=app_height / 3 , width=app_width , background = red_color)
 task_frame = tk.Frame(window , height=app_height - app_height / 3 , width=app_width , background=white_color)
-actual_timer  = tk.Label(timer_frame , text="00:00:00")
+actual_timer  = tk.Label(timer_frame , text="00:00:00" , font=text_font )
 add_button = tk.Button(task_frame ,  text="+"  , height=2 , width=4 , command=add_text_task)
 canvas_frame = tk.Frame(task_frame , background=red_color , height=329 , width=400)
 canvas = tk.Canvas(canvas_frame , background=red_color , height=329 , width = 400)
 scrollbar = ttk.Scrollbar(canvas_frame, orient="vertical", command=canvas.yview)
 scrollable_frame = ttk.Frame(canvas)
 canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+
+task_name_textbox = tk.Entry(task_frame , bd = 1 , relief="sunken" , width=59 , background= icons_front_color_2 , font=entry_font)
 
 
 ##### Configuring the controls #### 
@@ -187,6 +246,8 @@ close_button.bind("<Leave>" , lambda x  :  close_button.configure(background=con
 minimized_button.bind("<Enter>" , lambda x : minimized_button.configure(background=other_icons_back_color))
 minimized_button.bind("<Leave>" , lambda x  : minimized_button.configure(background=controls_base))
 scrollable_frame.bind("<Configure>", on_configure)
+task_name_textbox.bind("<Return>" , add_text_task_temp)
+
 
 ##### Packing the controls #### 
 title_bar.pack()
@@ -196,7 +257,7 @@ application_name.pack(side = tk.LEFT , padx=(5 , 0))
 
 timer_frame.pack()
 task_frame.pack()
-actual_timer.pack(pady=10)
+actual_timer.pack(pady=(48 , 0))
 add_button.pack(side = tk.RIGHT , pady=(2) , padx=(2) , anchor=tk.NE)
 canvas_frame.place(x=0 , y = 40)
 scrollbar.pack(side="right", fill="y")
@@ -204,6 +265,10 @@ scrollbar.pack(side="right", fill="y")
 canvas.pack()
 
 canvas.configure(yscrollcommand=scrollbar.set)
+
+
+task_name_textbox.pack(side=tk.LEFT  , padx=(2 , 0) , pady=(9 , 0) , anchor=tk.NE)
+
 
 
 window.mainloop()
