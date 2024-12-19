@@ -5,7 +5,10 @@ import threading as th
 from ctypes import windll
 from time import sleep
 from datetime import time
-import textwrap
+
+
+
+
 
 
 ### Constants ###
@@ -268,7 +271,7 @@ def set_appwindow(root):
         res = windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style)
         root.wm_withdraw()
         root.after(10, lambda: root.wm_deiconify())
-
+ 
 def close_application():
     window.destroy()
     sys.exit()
