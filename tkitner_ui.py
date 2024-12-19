@@ -36,23 +36,48 @@ def saving_details():
     conn.commit()
 
 def inserting_data():
+    clean_table()
     
-    c.execute('INSERT INTO tasks_data (id,name,time) VALUES ("%d" , "%s" , "%s" );' %( text_details['task_id'] , text_details['task_name'] , text_details['task_time']))
+    for each in text_details:
+        c.execute('INSERT INTO task (task) VALUES ("%s" );' %(each))
     saving_details()
-    print("Details Saved")
+    # c.execute('INSERT INTO task (task) VALUES ("%d" , "%s" , "%s" );' %( text_details['task_id'] , text_details['task_name'] , text_details['task_time']))
+    # saving_details()
+    # print("Details Saved")
+    window.after(5000 , inserting_data)
 
 
 def clean_table():
-    c.execute("DELETE FROM tasks_data")
+    c.execute("DELETE FROM task;")
 
 
 def loading_data():
-    c.execute("SELECT * FROM tasks_data;")
+    c.execute("SELECT * FROM task;")
     list  = c.fetchall()
-    for data in list:
-        print(data)
-    saving_details()
-
+    # for data in list:
+    #     print(data)
+    
+    for each in list:
+        current_id  = str(each).split(",")[0]
+        current_task_name  = str(each).split(",")[1]
+        current_time  = str(each).split(",")[2]
+        char_length = len(current_task_name)
+        text_control = current_text(scrollable_frame , current_task_name , current_id , char_length  , current_time) 
+    
+    # char_length  = task_name_textbox.get()
+    # if len(char_length) > 0 : 
+    #     global current_text_id
+    #     current_text_id  += 1
+    #     text_details.append(str(current_text_id)+","+char_length +","+"00:00:00" )
+    #     # for each in text_details:
+    #     #     print(each)
+    #     text_control  = current_text(scrollable_frame , char_length , current_text_id , len(char_length))
+    #     task_name_textbox.delete( 0 , tk.END)
+        
+        # for each in text_details:
+        #     print(each)
+    
+    
 
 
 
@@ -77,6 +102,8 @@ class current_text():
         if self.current_minutes == 60:
             self.current_hour+=1
             self.current_minutes = 0
+            
+        self.current_list_time  = f"{self.current_hour}:{self.current_minutes}:{self.current_seconds}"
         
         actual_timer.configure(text=f"{self.current_hour:02}:{self.current_minutes:02}:{self.current_seconds:02}")
 
@@ -85,12 +112,16 @@ class current_text():
         # for time in text_details:
         #     print(str(time[0].split(",")[2]))
         # timer_working = True
-
         index  = len(text_details)
         # print(index)
 
+        # for i in range(index):
+        #     print(text_details[i].split(",")[2])
+        # print(self.text_i)
         for i in range(index):
-            print(text_details[i].split(",")[2])
+            if int(text_details[i].split(",")[0]) == self.text_i:
+                text_details[i] =  str(self.text_i)+","+str(self.text_name)+","+str(self.current_list_time)
+
 
         if timer_working == False:
             window.after(1000 , self.timer_started)
@@ -103,21 +134,23 @@ class current_text():
         global text_details
         global actual_timer
         
+        
+        # for each in text_details:
+        #     print(each)
        
 
-        for each in text_details:
-            # print(each[0])
-            if int(each[0]) == self.text_i:
-                text_details.pop(int(each[0]))
-            print(len(text_details))
+        # for each in text_details:
+        #     # print(each[0])
+        #     if int(each[0]) == self.text_i:
+        #         text_details.pop(int(each[0]))
+            # print(len(text_details))
 
         # if self.text_i in text_details:
         #     text_details[self.text_i]["task_time"] = str(str(self.current_hour) + ":" + str(self.current_minutes) + ":" + str(self.current_seconds))
 
         # text_details.update({"task_id" : self.text_i , "task_name" : self.text_name , "task_time" : str(str(self.current_hour) + ":" + str(self.current_minutes) + ":" + str(self.current_seconds) )})
        
-            
-
+        
         actual_timer.configure(text="00:00:00")
 
 
@@ -149,12 +182,17 @@ class current_text():
         self.text_name = text_name
         self.text_i  = text_id
         self.char_length  = char_length
+        
+        # print(self.text_i)
 
         global timer_working
+        
+        current_time  = current_time.strip("'")
+       
 
-        self.current_hour  = int(current_time.split(":")[0])
-        self.current_minutes = int(current_time.split(":")[1])
-        self.current_seconds = int(current_time.split(":")[2])
+        self.current_hour  = int(str(current_time.split(":")[0]))
+        self.current_minutes = int(str(current_time.split(":")[1]))
+        self.current_seconds = int(str(current_time.split(":")[2]))
 
         self.working  = True
         self.current_text  = ""
@@ -288,6 +326,9 @@ def add_text_task_temp(event):
         text_control  = current_text(scrollable_frame , char_length , current_text_id , len(char_length))
         task_name_textbox.delete( 0 , tk.END)
         
+        # for each in text_details:
+        #     print(each)
+        
         
 
 
@@ -369,4 +410,8 @@ canvas.configure(yscrollcommand=scrollbar.set)
 task_name_textbox.pack(side=tk.LEFT  , padx=(3 , 0) , pady=(9 , 0) , anchor=tk.NE)
 
 
+
+# Call the database and load the details in the application and keep recurring the data and save the details in the database : 
+window.after(5000 , inserting_data)
+loading_data()
 window.mainloop()
