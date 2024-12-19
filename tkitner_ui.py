@@ -9,8 +9,6 @@ from datetime import time
 
 
 
-
-
 ### Constants ###
 application_base = '#1E1E1E'
 controls_base = '#2F2F2F'
@@ -55,18 +53,25 @@ def clean_table():
 
 
 def loading_data():
-    c.execute("SELECT * FROM task;")
-    list  = c.fetchall()
-    # for data in list:
-    #     print(data)
-    
-    for each in list:
-        current_id  = str(each).split(",")[0]
-        current_task_name  = str(each).split(",")[1]
-        current_time  = str(each).split(",")[2]
-        char_length = len(current_task_name)
-        text_control = current_text(scrollable_frame , current_task_name , current_id , char_length  , current_time) 
-    
+
+
+    try:
+
+        c.execute("SELECT * FROM task;")
+        list  = c.fetchall()
+        # for data in list:
+        #     print(data)
+        
+        for each in list:
+            current_id  = str(each).split(",")[0]
+            current_task_name  = str(each).split(",")[1]
+            current_time  = str(each).split(",")[2]
+            char_length = len(current_task_name)
+            text_control = current_text(scrollable_frame , current_task_name , current_id , char_length  , current_time) 
+
+    except Exception as loading_error:
+        pass
+        
     # char_length  = task_name_textbox.get()
     # if len(char_length) > 0 : 
     #     global current_text_id
