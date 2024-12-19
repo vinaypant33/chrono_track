@@ -19,7 +19,7 @@ other_icons_back_color = '#222B39'
 red_color  = "#ff0000"
 white_color  = '#ffffff'
 current_text_id  = 0
-text_details = {} # Name and id number and the time spent in the data
+text_details = [] # Name and id number and the time spent in the data
 timer_working  = True
 
 
@@ -80,6 +80,18 @@ class current_text():
         
         actual_timer.configure(text=f"{self.current_hour:02}:{self.current_minutes:02}:{self.current_seconds:02}")
 
+        # for time in text_details:
+        #     print(time)
+        # for time in text_details:
+        #     print(str(time[0].split(",")[2]))
+        # timer_working = True
+
+        index  = len(text_details)
+        # print(index)
+
+        for i in range(index):
+            print(text_details[i].split(",")[2])
+
         if timer_working == False:
             window.after(1000 , self.timer_started)
         else:
@@ -91,10 +103,16 @@ class current_text():
         global text_details
         global actual_timer
         
-        print(self.text_i)
+       
 
-        if self.text_i in text_details:
-            text_details[self.text_i]["task_time"] = str(str(self.current_hour) + ":" + str(self.current_minutes) + ":" + str(self.current_seconds))
+        for each in text_details:
+            # print(each[0])
+            if int(each[0]) == self.text_i:
+                text_details.pop(int(each[0]))
+            print(len(text_details))
+
+        # if self.text_i in text_details:
+        #     text_details[self.text_i]["task_time"] = str(str(self.current_hour) + ":" + str(self.current_minutes) + ":" + str(self.current_seconds))
 
         # text_details.update({"task_id" : self.text_i , "task_name" : self.text_name , "task_time" : str(str(self.current_hour) + ":" + str(self.current_minutes) + ":" + str(self.current_seconds) )})
        
@@ -121,7 +139,6 @@ class current_text():
                 self.timer_stopped()
 
 
-
     
     def delete_item_data(self):
         self.main_frame.destroy()
@@ -140,8 +157,6 @@ class current_text():
         self.current_seconds = int(current_time.split(":")[2])
 
         self.working  = True
-
-        
         self.current_text  = ""
 
         if char_length <= 64:
@@ -154,7 +169,6 @@ class current_text():
         elif char_length >= 105:
             self.current_height = 7
             self.wrap_text(self.text_name , 90)
-           
 
         self.main_frame  = tk.Frame(self.master_control , width=9 , height= self.current_height , background=application_base , bd=1 )
         self.main_frame.pack_propagate(0)
@@ -257,7 +271,7 @@ def add_text_task():
     if len(char_length) > 0 : 
         global current_text_id
         current_text_id  += 1
-        text_details.update({"task_id" : current_text_id , "task_name" : char_length , "task_time"  : "00:00:00" })
+        text_details.append(str(current_text_id)+","+char_length +","+"00:00:00" )
         text_control  = current_text(scrollable_frame , char_length , current_text_id , len(char_length))
         task_name_textbox.delete( 0 , tk.END)
 
@@ -268,13 +282,13 @@ def add_text_task_temp(event):
     if len(char_length) > 0 : 
         global current_text_id
         current_text_id  += 1
-        text_details.update({"task_id" : current_text_id , "task_name" : char_length , "task_time"  : "00:00:00"})
+        text_details.append(str(current_text_id)+","+char_length +","+"00:00:00" )
+        # for each in text_details:
+        #     print(each)
         text_control  = current_text(scrollable_frame , char_length , current_text_id , len(char_length))
         task_name_textbox.delete( 0 , tk.END)
         
-   
-
-
+        
 
 
 
