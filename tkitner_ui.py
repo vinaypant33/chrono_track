@@ -5,6 +5,9 @@ import threading as th
 from ctypes import windll
 from time import sleep
 from datetime import time
+import textwrap
+
+from tkinter import messagebox
 
 
 
@@ -21,7 +24,7 @@ red_color  = "#ff0000"
 white_color  = '#ffffff'
 current_text_id  = 0
 text_details = [] # Name and id number and the time spent in the data
-timer_working  = True
+timer_working  = True 
 
 
 #### Code for the local database : 
@@ -45,7 +48,7 @@ def inserting_data():
     # c.execute('INSERT INTO task (task) VALUES ("%d" , "%s" , "%s" );' %( text_details['task_id'] , text_details['task_name'] , text_details['task_time']))
     # saving_details()
     # print("Details Saved")
-    window.after(5000 , inserting_data)
+    window.after(3000 , inserting_data)
 
 
 def clean_table():
@@ -70,7 +73,7 @@ def loading_data():
             text_control = current_text(scrollable_frame , current_task_name , current_id , char_length  , current_time) 
 
     except Exception as loading_error:
-        pass
+        messagebox.showerror("Chrono Track" , "Unable to Load the database")
         
     # char_length  = task_name_textbox.get()
     # if len(char_length) > 0 : 
